@@ -1,0 +1,45 @@
+---
+title: 'Реєстрація автомобілів різного кольору з 1.01.19 до 1.06.19 в Україні'
+output: html_document
+---
+```{r}
+library(dplyr)
+
+library(readr)
+tz_opendata <- read_delim("~/Study/data/tz_opendata.csv", 
+    ";", escape_double = FALSE, trim_ws = TRUE)
+View(tz_opendata)
+
+tz_new <- tz_opendata %>% select(BRAND, MAKE_YEAR, COLOR)
+
+
+```
+
+
+```{r}
+tz_color <- tz_new %>% group_by(COLOR) %>% summarise(count=n())
+
+tz_sorted <- tz_color[order(-tz_color$count),]
+View(tz_sorted)
+  
+#SUM <- sum(tz_color$count)
+tz_K <- tz_sorted %>% mutate(K = count / 1000)
+```
+<h1>Які найпопулярніші кольори авто були серед зареєстрованих в першому півріччі 2019 року?</h1>
+
+Відповідь ми бачимо на графіку. Можна зробити висновок, що більшість українців не люблять виділятися і надають перевагу практичності та монохромній палітрі.
+```{r}
+#install.packages("ggplot2")
+library(ggplot2)
+ggplot(tz_K, aes(x=reorder(COLOR, -K), y=K)) +
+  geom_bar(stat="identity", width=.5) + 
+  xlab("колір авто") +
+  ylab("кількість, тис.шт.") +
+  labs(title = "Автокольорові вподобання українців", 
+       subtitle = "Реєстрація автомобілів в 2019 році", 
+       caption = "Джерело: портал відкритих даних") + 
+  theme(axis.text.x = element_text(angle=65, vjust=0.6))
+
+ 
+```
+
